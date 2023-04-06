@@ -43,7 +43,7 @@ def nextSong():
 
 def clickPlaylist():
     #Make Spotify fullscreen, take a screenshot, put into photopea.com and click info. Hover over playlist you want in order to get its screen coords.
-    mouse.position = (50, 380)
+    mouse.position = (40, 300)
     mouse.press(Button.left)
     mouse.release(Button.left)
 
@@ -54,7 +54,7 @@ def start():
     spacebar()
     response = requests.get(query, headers={"Content-Type": "application/json",
                                             "Authorization": "Bearer {}".format(spotify_token)})
-    clickPlaylist()
+    #clickPlaylist()
     #API request will for some reason not work properly with just one spacebar play (idk why) so loop will spam play and unplay until it works
     while response.status_code != 200:
         print("failed")
