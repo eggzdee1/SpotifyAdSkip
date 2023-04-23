@@ -1,9 +1,12 @@
 import requests
 import pprint
 import subprocess
-from pynput.keyboard import Key, Controller
+from pynput.keyboard import Key, Controller as KeyboardController
+from pynput.mouse import Button, Controller as MouseController
 from secrets import refreshToken, base64
 import time
+import pygetwindow as gw
+
 
 #Uses constant refresh token to generate a new token
 def newToken():
@@ -14,7 +17,8 @@ def newToken():
                              headers={"Authorization": "Basic " + base64})
     return response.json()['access_token']
 
-keyboard = Controller()
+keyboard = KeyboardController()
+mouse = MouseController()
 query = "https://api.spotify.com/v1/me/player/currently-playing"
 p = None
 spotify_token = newToken()
@@ -23,8 +27,8 @@ lastRefresh = time.time()
 
 #Functions for common keypress actions and Spotify startup sequence
 def spacebar():
-    keyboard.press(' ')
-    keyboard.release(' ')
+    keyboard.press(Key.space)
+    keyboard.release(Key.space)
 
 def altTab():
     keyboard.press(Key.alt)
@@ -39,10 +43,18 @@ def nextSong():
     keyboard.release(Key.ctrl)
     keyboard.release(Key.right)
 
+def clickPlaylist():
+    #Make Spotify fullscreen, take a screenshot, put into photopea.com and click info. Hover over playlist you want in order to get its screen coords.
+    mouse.position = (40, 300)
+    mouse.press(Button.left)
+    mouse.release(Button.left)
+
 def start():
     global p
     p = subprocess.Popen(r"C:\Users\toady\AppData\Roaming\Spotify\Spotify.exe", shell=True)
     time.sleep(2.5)
+    spotify = gw.getWindowsWithTitle('Spotify Free')[0]
+    spotify.activate()
     spacebar()
     response = requests.get(query, headers={"Content-Type": "application/json",
                                             "Authorization": "Bearer {}".format(spotify_token)})
@@ -73,10 +85,12 @@ while True:
         response_json = response.json()
         if "skipping_next" in response_json['actions']['disallows']:
             print("ad is playing rn")
+
             subprocess.Popen("taskkill /F /T /PID %i" % p.pid, shell=True)
             time.sleep(2)
             start()
             time.sleep(300)  #Pauses while loop for 5 min so it doesn't run pointlessly, as there obviously won't be another ad for a little while
+
         else:
             print("song is playing rn")
     except:
