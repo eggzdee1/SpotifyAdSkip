@@ -1,0 +1,1 @@
+python PycharmProjects/SpotifyAdSkip/main.py
